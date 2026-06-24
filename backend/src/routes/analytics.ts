@@ -78,26 +78,24 @@ router.post("/events", async (req, res, next) => {
     };
 
     const session = await Session.findOneAndUpdate(
-      { sessionId },
-      {
-        $setOnInsert: {
-          sessionId,
-          firstSeen: timestamp,
-          firstPageUrl: pageUrl,
-          userAgent: asString(body.userAgent),
-          referrer: asString(body.referrer),
-        },
-        $set: {
-          lastSeen: timestamp,
-          lastPageUrl: pageUrl,
-          lastEventType: eventType,
-          ...(asString(body.userAgent) ? { userAgent: asString(body.userAgent) } : {}),
-          ...(asString(body.referrer) ? { referrer: asString(body.referrer) } : {}),
-        },
-        $inc: inc,
-      },
-      { upsert: true, new: true }
-    ).lean();
+  { sessionId },
+  {
+    $setOnInsert: {
+      sessionId,
+      firstSeen: timestamp,
+      firstPageUrl: pageUrl,
+    },
+    $set: {
+      lastSeen: timestamp,
+      lastPageUrl: pageUrl,
+      lastEventType: eventType,
+      userAgent: asString(body.userAgent),
+      referrer: asString(body.referrer),
+    },
+    $inc: inc,
+  },
+  { upsert: true, new: true }
+).lean();
 
     res.status(201).json({ ok: true, event, session });
   } catch (error) {

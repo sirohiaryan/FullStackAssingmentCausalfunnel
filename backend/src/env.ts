@@ -10,3 +10,4 @@ export const env = {
 
 if (!env.MONGODB_URI) {
   throw new Error("MONGODB_URI is required");
+}
