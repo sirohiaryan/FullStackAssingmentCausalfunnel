@@ -188,21 +188,7 @@ dist/
 
 Install dependencies after cloning:
 
-```bash
 npm install
-```
 
-## Future Improvements
 
-* Authentication and multi-tenant workspaces
-* Funnel creation through the dashboard UI
-* Date-range filtering and cohort analysis
-* Exportable reports
-* Real-time event streaming
-* Rate limiting and event validation
-* Docker deployment configuration
-* Automated tests and CI/CD pipeline
 
-## Author
-
-Aryan Sirohi
