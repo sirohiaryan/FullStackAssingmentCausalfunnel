@@ -1,94 +1,127 @@
 import React, { useState, useEffect } from 'react';
 
-export default function HeatmapView({ apiBase }) {
-  const [targetUrl, setTargetUrl] = useState('https://demo-shop.com/');
-  const [clickPoints, setClickPoints] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default function SessionsView({ apiBase }) {
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [timeline, setTimeline] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`${apiBase}/heatmap?url=${encodeURIComponent(targetUrl)}`)
+    fetch(`${apiBase}/sessions`)
       .then(res => res.json())
       .then(data => {
-        setClickPoints(data);
+        setSessions(data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error("Error mapping heatmap logs:", err);
-        setLoading(false);
-      });
-  }, [targetUrl, apiBase]);
+      .catch(err => console.error("API Fetch Error:", err));
+  }, [apiBase]);
+
+  const fetchSessionRouteTimeline = (sessionId) => {
+    setSelectedSession(sessionId);
+    fetch(`${apiBase}/sessions/${sessionId}`)
+      .then(res => res.json())
+      .then(data => setTimeline(data))
+      .catch(err => console.error("API Timeline Error:", err));
+  };
+
+  if (loading) {
+    return (
+      <div class="flex flex-col items-center justify-center py-24 space-y-3">
+        <div class="h-4 w-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-xs font-mono text-zinc-500">Streaming active database records...</p>
+      </div>
+    );
+  }
 
   return (
-    <div class="space-y-6">
-      {/* Control Action Header */}
-      <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 class="font-bold text-zinc-100">Page Click Hotspot Map Overlay</h2>
-          <p class="text-xs text-zinc-400">Isolating relative micro-coordinate actions natively across viewports.</p>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Left Columns: Sessions Ledger */}
+      <div class="lg:col-span-5 bg-[#09090b] rounded-xl border border-zinc-800/80 overflow-hidden shadow-2xl">
+        <div class="p-4 bg-[#141416]/60 border-b border-zinc-800/80 flex justify-between items-center">
+          <h2 class="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Identified Sessions [cite: 23, 31, 32]</h2>
+          <span class="text-[10px] font-mono bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">
+            {sessions.length} tracks
+          </span>
         </div>
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <label class="text-xs text-zinc-400 font-mono whitespace-nowrap">Filter URL:</label>
-          <select 
-            value={targetUrl} 
-            onChange={(e) => setTargetUrl(e.target.value)}
-            class="bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-mono px-3 py-2 text-zinc-200 outline-none focus:border-emerald-500 w-full md:w-72"
-          >
-            <option value="https://demo-shop.com/">https://demo-shop.com/</option>
-            <option value="https://demo-shop.com/products">https://demo-shop.com/products</option>
-            <option value="https://demo-shop.com/cart">https://demo-shop.com/cart</option>
-          </select>
+        
+        <div class="divide-y divide-zinc-900 max-h-[72vh] overflow-y-auto custom-scrollbar">
+          {sessions.map(sess => (
+            <div 
+              key={sess._id} 
+              onClick={() => fetchSessionRouteTimeline(sess._id)}
+              class={`p-4 cursor-pointer transition-all duration-150 relative ${selectedSession === sess._id ? 'bg-[#141416] border-l-2 border-white' : 'hover:bg-[#141416]/40'}`}
+            >
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-mono text-xs font-medium text-white tracking-tight">{sess._id} [cite: 32]</span>
+                <span class="font-mono text-[10px] text-zinc-400 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded-md">
+                  {sess.totalEvents} events [cite: 23, 32]
+                </span>
+              </div>
+              <div class="flex flex-col space-y-1">
+                <p class="text-xs text-zinc-500 font-mono truncate"><span class="text-zinc-600">entry:</span> {sess.entryPage}</p>
+                <p class="text-[10px] text-zinc-600 font-mono">
+                  {new Date(sess.lastActive).toLocaleDateString()} at {new Date(sess.lastActive).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Render Heatmap Canvas Frame Layout */}
-      <div class="bg-zinc-900 rounded-2xl border border-zinc-800 p-4 relative overflow-hidden flex flex-col items-center">
-        <div class="w-full flex justify-between items-center text-xs text-zinc-500 font-mono mb-2 px-1">
-          <span>Target Context Canvas Matrix (Responsive Body Space)</span>
-          <span class="text-emerald-400 font-semibold">{clickPoints.length} total hot-clicks logged</span>
-        </div>
-
-        {/* Heatmap Visual Sandbox Frame */}
-        <div class="w-full max-w-5xl aspect-video rounded-xl bg-zinc-950 border border-zinc-800/80 relative shadow-inner overflow-hidden group">
-          {/* Mock page structural shadows inside canvas to create a brilliant visualization */}
-          <div class="absolute inset-x-0 top-0 h-12 bg-zinc-900/40 border-b border-zinc-800/40 flex items-center px-4 justify-between pointer-events-none opacity-40">
-            <div class="flex gap-1.5">
-              <div class="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-              <div class="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-              <div class="h-2.5 w-2.5 rounded-full bg-zinc-700" />
+      {/* Right Columns: Telemetry Audit Log */}
+      <div class="lg:col-span-7 bg-[#09090b] rounded-xl border border-zinc-800/80 p-5 min-h-[55vh] flex flex-col shadow-2xl">
+        {selectedSession ? (
+          <>
+            <div class="mb-5 pb-4 border-b border-zinc-800 flex flex-col gap-1">
+              <h3 class="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">User Journey Stream Pipeline [cite: 33]</h3>
+              <p class="text-[11px] text-zinc-500 font-mono">ID: <span class="text-zinc-300">{selectedSession}</span> [cite: 12, 33]</p>
             </div>
-            <div class="w-1/3 h-4 bg-zinc-800 rounded-md" />
-            <div class="w-12 h-4 bg-zinc-800 rounded-md" />
+            
+            <div class="space-y-3 flex-1 overflow-y-auto pr-1 max-h-[62vh]">
+              {timeline.map((event, index) => (
+                <div key={event._id} class="flex items-start gap-4 p-3.5 bg-[#030303] border border-zinc-800/60 rounded-lg hover:border-zinc-700/80 transition-colors">
+                  {/* Event Type Tickers */}
+                  <div class="flex flex-col items-center justify-center pt-0.5">
+                    <span class={`text-[9px] font-mono font-bold tracking-widest uppercase px-2 py-0.5 rounded border ${
+                      event.eventType === 'page_view' 
+                        ? 'bg-zinc-900 text-zinc-300 border-zinc-700' 
+                        : 'bg-zinc-900 text-amber-400 border-amber-900/40'
+                    }`}>
+                      {event.eventType} [cite: 13]
+                    </span>
+                  </div>
+
+                  {/* Core Structured Event Meta Metadata */}
+                  <div class="flex-1 min-w-0 space-y-2">
+                    <div class="flex justify-between items-center">
+                      <p class="text-xs font-mono text-zinc-300 truncate break-all bg-[#09090b] px-2 py-1 rounded border border-zinc-900 max-w-full">
+                        {event.url} [cite: 14]
+                      </p>
+                      <span class="text-[10px] font-mono text-zinc-600 shrink-0 ml-2">
+                        +{index * 4}s
+                      </span>
+                    </div>
+
+                    {event.eventType === 'click' && (
+                      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono text-zinc-500 bg-[#09090b]/40 p-2 rounded border border-zinc-900/60">
+                        <span>matrix_x: <strong class="text-zinc-300 font-normal">{event.clickX}%</strong></span> [cite: 16]
+                        <span>matrix_y: <strong class="text-zinc-300 font-normal">{event.clickY}%</strong></span> [cite: 16]
+                        <span class="text-zinc-800">|</span>
+                        <span>viewport: <span class="text-zinc-400">{event.screenSize || 'unknown'}</span></span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div class="flex-1 flex flex-col items-center justify-center text-center p-8 my-auto">
+            <span class="font-mono text-xs text-zinc-600 border border-zinc-800/80 bg-zinc-900/20 px-3 py-1 rounded">
+              awaiting_session_selection_stream
+            </span>
           </div>
-
-          {loading ? (
-            <div class="absolute inset-0 flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm z-50 text-zinc-400 text-xs font-mono">
-              Recalculating absolute plot coordinate geometry vectors...
-            </div>
-          ) : clickPoints.length === 0 ? (
-            <div class="absolute inset-0 flex items-center justify-center text-zinc-600 text-sm font-mono">
-              No click matrix coordinates tracked for this route interface.
-            </div>
-          ) : (
-            // Absolute Coordinates Placement Matrix System
-            clickPoints.map((point) => (
-              <div
-                key={point._id}
-                style={{
-                  position: 'absolute',
-                  left: `${point.clickX}%`,
-                  top: `${point.clickY}%`,
-                  transform: 'translate(-50%, -50%)'
-                }}
-                class="absolute h-5 w-5 rounded-full pointer-events-none mix-blend-screen transition-all duration-500"
-              >
-                {/* Glowing Heat Core */}
-                <div class="absolute inset-0 rounded-full bg-amber-500 opacity-60 blur-[3px] animate-pulse" />
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-red-400" />
-              </div>
-            ))
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
