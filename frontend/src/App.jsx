@@ -11,38 +11,43 @@ function App() {
   const [activeTab, setActiveTab] = useState('sessions');
 
   useEffect(() => {
-    // Initializing tracking scripts inside the client platform dashboard itself for demo testing
     initializeTracker();
   }, []);
 
   return (
-    <div class="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col">
-      {/* Top Header */}
-      <header class="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur px-8 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-black tracking-tighter">
-            CF
+    <div class="min-h-screen bg-[#000000] text-[#f4f4f5] antialiased selection:bg-zinc-800 selection:text-white flex flex-col">
+      {/* Top Professional Navigation Bar */}
+      <header class="border-b border-zinc-800/80 bg-[#09090b] px-6 py-3.5 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <div class="h-6 w-6 rounded bg-white flex items-center justify-center font-mono font-black text-xs text-black tracking-tighter">
+              CF
+            </div>
+            <span class="text-sm font-semibold tracking-tight text-white">CausalFunnel Analytics</span>
           </div>
-          <h1 class="text-xl font-bold tracking-tight">CausalFunnel <span class="text-zinc-400 font-normal text-sm border-l border-zinc-700 pl-3">Behavior Engine</span></h1>
+          <div class="h-4 w-px bg-zinc-800 hidden sm:block" />
+          <span class="text-xs text-zinc-500 font-mono hidden sm:block">v1.0.0-production</span>
         </div>
-        <div class="flex gap-2 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+
+        {/* Monochromatic Premium Tab System */}
+        <div class="flex gap-1 bg-[#18181b] p-1 rounded-lg border border-zinc-800/60">
           <button 
             onClick={() => setActiveTab('sessions')}
-            class={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${activeTab === 'sessions' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
+            class={`px-3.5 py-1.5 rounded-md font-medium text-xs font-mono transition-all ${activeTab === 'sessions' ? 'bg-[#27272a] text-white border border-zinc-700/50 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
-            Sessions Journey
+            session_streams
           </button>
           <button 
             onClick={() => setActiveTab('heatmap')}
-            class={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${activeTab === 'heatmap' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
+            class={`px-3.5 py-1.5 rounded-md font-medium text-xs font-mono transition-all ${activeTab === 'heatmap' ? 'bg-[#27272a] text-white border border-zinc-700/50 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
           >
-            Heatmap Layer
+            heatmap_layer
           </button>
         </div>
       </header>
 
-      {/* Main UI Arena */}
-      <main class="flex-1 p-8 max-w-7xl w-full mx-auto">
+      {/* Main Workspace Frame */}
+      <main class="flex-1 p-6 max-w-7xl w-full mx-auto">
         {activeTab === 'sessions' ? (
           <SessionsView apiBase={API_BASE} />
         ) : (
