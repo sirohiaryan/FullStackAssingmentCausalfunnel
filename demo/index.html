@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Northstar — Everyday objects</title>
+
+  <script>
+    window.CausalFunnelTrackerConfig = {
+      endpoint: "http://localhost:4000/api/events"
+    };
+  </script>
+  <script src="./tracker.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --ink: #18211f;
+      --muted: #69716e;
+      --paper: #faf9f6;
+      --line: #e7e5df;
+      --soft: #e6e1d8;
+      --sage: #d9ddd6;
+      --danger: #a33b32;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+
+    header {
+      min-height: 68px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6%;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      gap: 14px;
+    }
+
+    header b {
+      font-size: 22px;
+      letter-spacing: -1px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .header-btn {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+      padding: 9px 12px;
+    }
+
+    .bag {
+      background: var(--ink);
+      color: #fff;
+      border: 1px solid var(--ink);
+      padding: 10px 14px;
+    }
+
+    .hero {
+      min-height: 410px;
+      background: var(--sage);
+      padding: 88px 8%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero small { letter-spacing: 2px; }
+
+    .hero h1 {
+      font-size: clamp(46px, 7vw, 72px);
+      line-height: .93;
+      letter-spacing: -3px;
+      margin: 18px 0 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+
+    .hero button {
+      background: var(--ink);
+      color: #fff;
+      border: 0;
+      padding: 14px 20px;
+    }
+
+    .hero .inquiry-hero {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
+    .orb {
+      position: absolute;
+      right: 12%;
+      top: 65px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: #b6c0b5;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 55px auto;
+      padding: 0 24px;
+    }
+
+    .tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+
+    .filter {
+      background: #fff;
+      border: 1px solid #d9d8d2;
+      padding: 10px 14px;
+    }
+
+    .filter.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .product-count {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .product {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .product-image-button {
+      border: 0;
+      padding: 0;
+      width: 100%;
+      background: transparent;
+      display: block;
+    }
+
+    .pic {
+      height: 220px;
+      background: var(--soft);
+      overflow: hidden;
+    }
+
+    .pic img,
+    .detail-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .25s ease;
+    }
+
+    .product-image-button:hover img { transform: scale(1.04); }
+
+    .product h3 {
+      margin: 14px 0 5px;
+      cursor: pointer;
+    }
+
+    .product p {
+      color: var(--muted);
+      margin: 0 0 14px;
+      text-transform: capitalize;
+    }
+
+    .add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .add-btn {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--ink);
+      padding: 10px;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--ink);
+      width: 100%;
+    }
+
+    .quantity-control button {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      background: #fff;
+      font-size: 21px;
+    }
+
+    .quantity-control span {
+      min-width: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 45px;
+      text-align: center;
+      border: 1px dashed #c9c7c0;
+      color: var(--muted);
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .back {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      color: var(--ink);
+      text-decoration: underline;
+      margin-bottom: 25px;
+    }
+
+    .bag-layout {
+      display: grid;
+      grid-template-columns: 1.65fr .9fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .bag-list, .checkout, .delivery-card, .inquiry-box {
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .bag-list { padding: 22px; }
+
+    .bag-item {
+      display: grid;
+      grid-template-columns: 78px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .bag-item:last-child { border-bottom: 0; }
+
+    .bag-icon {
+      height: 72px;
+      overflow: hidden;
+      background: var(--soft);
+    }
+
+    .bag-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .bag-item h3 { margin: 0 0 6px; }
+    .bag-item p { margin: 0; color: var(--muted); }
+    .bag-item .quantity-control { width: 126px; }
+
+    .checkout {
+      padding: 22px;
+      position: sticky;
+      top: 90px;
+    }
+
+    .checkout h2 { margin-top: 0; }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin: 12px 0;
+      color: var(--muted);
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      margin-top: 16px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .payment-options {
+      margin-top: 24px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 0;
+      cursor: pointer;
+    }
+
+    .cod-message {
+      display: none;
+      color: var(--danger);
+      font-size: 13px;
+      margin: 0 0 10px 25px;
+    }
+
+    .cod-message.active { display: block; }
+
+    .checkout-btn {
+      width: 100%;
+      background: var(--ink);
+      color: #fff;
+      border: 0;
+      padding: 13px;
+      margin-top: 18px;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 45px;
+      align-items: start;
+    }
+
+    .detail-image {
+      height: 530px;
+      background: var(--soft);
+    }
+
+    .detail-info h1 {
+      margin: 0 0 10px;
+      font-size: 42px;
+      letter-spacing: -1px;
+    }
+
+    .detail-price {
+      font-size: 20px;
+      margin-bottom: 22px;
+    }
+
+    .description {
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 460px;
+      margin-bottom: 28px;
+    }
+
+    .detail-actions {
+      display: grid;
+      gap: 10px;
+      max-width: 380px;
+    }
+
+    .primary-btn {
+      background: var(--ink);
+      color: #fff;
+      border: 1px solid var(--ink);
+      padding: 13px;
+    }
+
+    .secondary-btn {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+      padding: 13px;
+    }
+
+    .inquiry-box {
+      padding: 24px;
+      max-width: 650px;
+    }
+
+    .inquiry-box label {
+      display: block;
+      margin: 15px 0 6px;
+      font-size: 14px;
+    }
+
+    .inquiry-box input,
+    .inquiry-box textarea {
+      width: 100%;
+      border: 1px solid #c9c7c0;
+      padding: 11px;
+      background: #fff;
+    }
+
+    .inquiry-box textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .inquiry-success {
+      display: none;
+      margin-top: 15px;
+      color: #356047;
+    }
+
+    .delivery-options {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .delivery-option {
+      border: 1px solid var(--line);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: #fff;
+      text-align: left;
+    }
+
+    .delivery-option.selected {
+      border: 2px solid var(--ink);
+    }
+
+    .delivery-option p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: 60px;
+      background: var(--ink);
+      color: #fff;
+      padding: 45px 8%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media (max-width: 760px) {
+      header { padding: 0 4%; }
+      .header-actions { gap: 5px; }
+      .header-btn, .bag { padding: 8px 9px; font-size: 13px; }
+      .grid { grid-template-columns: 1fr; }
+      .bag-layout, .detail-layout { grid-template-columns: 1fr; }
+      .checkout { position: static; }
+      .product-count { width: 100%; margin-left: 0; margin-top: 6px; }
+      .orb { right: -65px; opacity: .65; }
+      .bag-item { grid-template-columns: 62px 1fr; }
+      .bag-item .quantity-control { grid-column: 2; }
+      .detail-image { height: 390px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <b>northstar</b>
+    <div class="header-actions">
+      <button class="header-btn" id="wishlistButton">Wishlist (0)</button>
+      <button class="bag" id="bagButton">Bag (0)</button>
+    </div>
+  </header>
+
+  <section class="page active" id="shopPage">
+    <section class="hero">
+      <small>SPRING / SUMMER 2026</small>
+      <h1>Objects for<br>everyday use.</h1>
+      <div class="hero-actions">
+        <button id="shopButton">Shop collection</button>
+        <button class="inquiry-hero" id="homeInquiryButton">Inquiry</button>
+      </div>
+      <div class="orb"></div>
+    </section>
+
+    <main class="wrap" id="collection">
+      <div class="tools">
+        <button class="filter active" data-category="all">All products</button>
+        <button class="filter" data-category="home">Home</button>
+        <button class="filter" data-category="desk">Desk</button>
+        <button class="filter" data-category="travel">Travel</button>
+        <span class="product-count" id="productCount"></span>
+      </div>
+
+      <div class="grid" id="productGrid"></div>
+    </main>
+  </section>
+
+  <main class="page wrap" id="bagPage">
+    <button class="back" data-go="shop">← Continue shopping</button>
+    <h1>Your bag</h1>
+
+    <div class="bag-layout">
+      <section class="bag-list" id="bagList"></section>
+
+      <aside class="checkout">
+        <h2>Order summary</h2>
+        <div class="summary-line"><span>Items</span><span id="itemTotal">0</span></div>
+        <div class="summary-line"><span>Delivery</span><span>Calculated after UPI selection</span></div>
+        <div class="summary-total"><span>Total</span><span id="priceTotal">$0.00</span></div>
+
+        <div class="payment-options">
+          <strong>Payment method</strong>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="cod">
+            Cash on Delivery
+          </label>
+          <div class="cod-message" id="codMessage">Not available on this order.</div>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="upi" checked>
+            UPI
+          </label>
+        </div>
+
+        <button class="checkout-btn" id="checkoutButton">Continue to delivery</button>
+      </aside>
+    </div>
+  </main>
+
+  <main class="page wrap" id="detailPage">
+    <button class="back" data-go="shop">← Back to collection</button>
+    <div class="detail-layout" id="detailContent"></div>
+  </main>
+
+  <main class="page wrap" id="wishlistPage">
+    <button class="back" data-go="shop">← Continue shopping</button>
+    <h1>Your wishlist</h1>
+    <div class="grid" id="wishlistGrid"></div>
+  </main>
+
+  <main class="page wrap" id="inquiryPage">
+    <button class="back" data-go="shop">← Back to shop</button>
+    <h1>Product inquiry</h1>
+
+    <form class="inquiry-box" id="inquiryForm">
+      <label for="inquiryName">Name</label>
+      <input id="inquiryName" required placeholder="Your name">
+
+      <label for="inquiryEmail">Email</label>
+      <input id="inquiryEmail" type="email" required placeholder="you@example.com">
+
+      <label for="inquiryMessage">What would you like to know?</label>
+      <textarea id="inquiryMessage" required placeholder="Ask about a product, delivery, or availability."></textarea>
+
+      <button class="primary-btn" type="submit">Send inquiry</button>
+      <div class="inquiry-success" id="inquirySuccess">Inquiry recorded for this demo.</div>
+    </form>
+  </main>
+
+  <main class="page wrap" id="deliveryPage">
+    <button class="back" data-go="bag">← Back to bag</button>
+    <h1>Select delivery</h1>
+
+    <section class="delivery-card" style="padding:24px;max-width:700px;">
+      <p style="margin-top:0;color:#69716e;">
+        Select a delivery speed. The delivery charge will be added to your order total.
+      </p>
+
+      <div class="delivery-options">
+        <button class="delivery-option" data-delivery-days="1" data-delivery-charge="15">
+          <span><strong>1-day delivery</strong><p>Priority delivery</p></span>
+          <strong>$15.00</strong>
+        </button>
+
+        <button class="delivery-option selected" data-delivery-days="2" data-delivery-charge="8">
+          <span><strong>2-day delivery</strong><p>Standard express delivery</p></span>
+          <strong>$8.00</strong>
+        </button>
+
+        <button class="delivery-option" data-delivery-days="3" data-delivery-charge="0">
+          <span><strong>3-day delivery</strong><p>Standard delivery</p></span>
+          <strong>Free</strong>
+        </button>
+      </div>
+
+      <div class="summary-total" style="margin-top:26px;">
+        <span>Final total</span>
+        <span id="deliveryFinalTotal">$0.00</span>
+      </div>
+
+      <button class="primary-btn" id="confirmOrderButton" style="width:100%;margin-top:18px;">
+        Confirm UPI order
+      </button>
+      <div class="inquiry-success" id="orderSuccess">UPI order confirmed in this demo.</div>
+    </section>
+  </main>
+
+  <footer>
+    <b>northstar</b>
+    <span>Designed for ordinary days.</span>
+  </footer>
+
+  <script>
+    const products = [
+      {
+        id: "arc-lamp",
+        name: "Arc Lamp",
+        price: 84,
+        category: "home",
+        image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80",
+        description: "A soft, sculptural lamp for warm evening light. Built to sit quietly beside a sofa, shelf, or reading chair."
+      },
+      {
+        id: "orbit-tray",
+        name: "Orbit Tray",
+        price: 42,
+        category: "home",
+        image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80",
+        description: "A circular tray for keys, candles, and everyday objects. Its low profile keeps surfaces organised without looking formal."
+      },
+      {
+        id: "linen-throw",
+        name: "Linen Throw",
+        price: 58,
+        category: "home",
+        image: "https://images.unsplash.com/photo-1583845112203-454c3e3e6a12?auto=format&fit=crop&w=900&q=80",
+        description: "A lightweight linen throw for sofas and beds. Breathable texture makes it useful through warmer and cooler months."
+      },
+      {
+        id: "stone-vase",
+        name: "Stone Vase",
+        price: 36,
+        category: "home",
+        image: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=900&q=80",
+        description: "A minimal vase with a matte stone finish. Designed for a few stems, dried branches, or an empty tabletop."
+      },
+      {
+        id: "field-notebook",
+        name: "Field Notebook",
+        price: 18,
+        category: "desk",
+        image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=80",
+        description: "A compact notebook for ideas, diagrams, and daily lists. Durable enough for a desk, backpack, or field notes."
+      },
+      {
+        id: "form-pen",
+        name: "Form Pen",
+        price: 24,
+        category: "desk",
+        image: "https://images.unsplash.com/photo-1585336261022-680e295ce3fe?auto=format&fit=crop&w=900&q=80",
+        description: "A balanced metal pen with a clean, simple profile. Made for long writing sessions and ordinary desk work."
+      },
+      {
+        id: "grid-organizer",
+        name: "Grid Organizer",
+        price: 46,
+        category: "desk",
+        image: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=900&q=80",
+        description: "A modular desk organiser for stationery and cables. Keeps the items you use most within reach and visible."
+      },
+      {
+        id: "oak-stand",
+        name: "Oak Monitor Stand",
+        price: 72,
+        category: "desk",
+        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80",
+        description: "A raised oak stand that clears space beneath your screen. A practical way to improve desk layout and posture."
+      },
+      {
+        id: "wayfarer-bottle",
+        name: "Wayfarer Bottle",
+        price: 28,
+        category: "travel",
+        image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=900&q=80",
+        description: "A reusable bottle sized for commutes and day trips. Insulated construction helps keep drinks at a steady temperature."
+      },
+      {
+        id: "canvas-pouch",
+        name: "Canvas Pouch",
+        price: 32,
+        category: "travel",
+        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",
+        description: "A hard-wearing canvas pouch for chargers, pens, and small essentials. Simple enough to move between bags."
+      },
+      {
+        id: "route-towel",
+        name: "Route Towel",
+        price: 22,
+        category: "travel",
+        image: "https://images.unsplash.com/photo-1603712725038-e9334ae8f39f?auto=format&fit=crop&w=900&q=80",
+        description: "A compact quick-drying towel for travel and training. Packs down small while remaining useful after repeated use."
+      },
+      {
+        id: "weekend-case",
+        name: "Weekend Case",
+        price: 96,
+        category: "travel",
+        image: "https://images.unsplash.com/photo-1553531889-56b6b81e5d44?auto=format&fit=crop&w=900&q=80",
+        description: "A structured carry case for short trips and overnight packing. Designed to hold essentials without excess bulk."
+      }
+    ];
+
+    let activeCategory = "all";
+    let selectedProductId = null;
+    let selectedDeliveryCharge = 8;
+    let selectedDeliveryDays = 2;
+
+    let cart = JSON.parse(sessionStorage.getItem("northstarCart") || "{}");
+    let wishlist = JSON.parse(sessionStorage.getItem("northstarWishlist") || "[]");
+
+    const money = (value) => `$${value.toFixed(2)}`;
+    const getProduct = (id) => products.find((product) => product.id === id);
+    const getQuantity = (id) => cart[id] || 0;
+
+    function funnel(eventName, properties = {}) {
+      if (window.CausalFunnel && typeof window.CausalFunnel.track === "function") {
+        window.CausalFunnel.track(eventName, properties);
+      }
+    }
+
+    function saveData() {
+      sessionStorage.setItem("northstarCart", JSON.stringify(cart));
+      sessionStorage.setItem("northstarWishlist", JSON.stringify(wishlist));
+    }
+
+    function cartItemCount() {
+      return Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
+    }
+
+    function cartPriceTotal() {
+      return Object.entries(cart).reduce((sum, [id, quantity]) => {
+        const product = getProduct(id);
+        return product ? sum + product.price * quantity : sum;
+      }, 0);
+    }
+
+    function updateHeader() {
+      document.getElementById("bagButton").textContent = `Bag (${cartItemCount()})`;
+      document.getElementById("wishlistButton").textContent = `Wishlist (${wishlist.length})`;
+    }
+
+    function changeQuantity(id, amount) {
+      const product = getProduct(id);
+      const oldQuantity = getQuantity(id);
+      const nextQuantity = oldQuantity + amount;
+
+      if (nextQuantity <= 0) {
+        delete cart[id];
+      } else {
+        cart[id] = nextQuantity;
+      }
+
+      const newQuantity = getQuantity(id);
+
+      if (amount > 0 && oldQuantity === 0) {
+        funnel("add_to_bag", {
+          productId: product.id,
+          productName: product.name,
+          category: product.category,
+          price: product.price,
+          quantity: newQuantity,
+          cartValue: cartPriceTotal()
+        });
+      } else {
+        funnel("bag_quantity_changed", {
+          productId: product.id,
+          productName: product.name,
+          category: product.category,
+          oldQuantity,
+          newQuantity,
+          cartValue: cartPriceTotal()
+        });
+      }
+
+      saveData();
+      updateHeader();
+      renderProducts();
+      renderBag();
+      renderDetail();
+      renderWishlist();
+    }
+
+    function toggleWishlist(id) {
+      const product = getProduct(id);
+      const wasWishlisted = wishlist.includes(id);
+
+      if (wasWishlisted) {
+        wishlist = wishlist.filter((itemId) => itemId !== id);
+      } else {
+        wishlist.push(id);
+      }
+
+      funnel("wishlist_updated", {
+        productId: product.id,
+        productName: product.name,
+        category: product.category,
+        action: wasWishlisted ? "remove" : "add",
+        wishlistCount: wishlist.length
+      });
+
+      saveData();
+      updateHeader();
+      renderProducts();
+      renderDetail();
+      renderWishlist();
+    }
+
+    function productCard(product) {
+      const quantity = getQuantity(product.id);
+      const wished = wishlist.includes(product.id);
+
+      const cartAction = quantity === 0
+        ? `<button class="add-btn" data-action="add" data-id="${product.id}">Add to bag</button>`
+        : `<div class="quantity-control">
+             <button data-action="decrease" data-id="${product.id}">−</button>
+             <span>${quantity}</span>
+             <button data-action="increase" data-id="${product.id}">+</button>
+           </div>`;
+
+      return `
+        <article class="product">
+          <button class="product-image-button" data-action="detail" data-id="${product.id}" aria-label="View ${product.name}">
+            <div class="pic"><img src="${product.image}" alt="${product.name}"></div>
+          </button>
+          <h3 data-action="detail" data-id="${product.id}">${product.name}</h3>
+          <p>${money(product.price)} · ${product.category}</p>
+          <div class="add-row">${cartAction}</div>
+          <button class="secondary-btn" style="width:100%;margin-top:8px;padding:9px;" data-action="wishlist" data-id="${product.id}">
+            ${wished ? "Remove from wishlist" : "Add to wishlist"}
+          </button>
+        </article>
+      `;
+    }
+
+    function renderProducts() {
+      const visible = activeCategory === "all"
+        ? products
+        : products.filter((product) => product.category === activeCategory);
+
+      document.getElementById("productCount").textContent =
+        `${visible.length} ${visible.length === 1 ? "object" : "objects"}`;
+
+      document.getElementById("productGrid").innerHTML =
+        visible.map(productCard).join("");
+    }
+
+    function renderBag() {
+      const entries = Object.entries(cart).filter(
+        ([id, quantity]) => getProduct(id) && quantity > 0
+      );
+      const list = document.getElementById("bagList");
+
+      if (!entries.length) {
+        list.innerHTML = `<div class="empty">Your bag is empty. Add an object from the collection.</div>`;
+      } else {
+        list.innerHTML = entries.map(([id, quantity]) => {
+          const product = getProduct(id);
+
+          return `
+            <article class="bag-item">
+              <div class="bag-icon"><img src="${product.image}" alt="${product.name}"></div>
+              <div>
+                <h3>${product.name}</h3>
+                <p>${money(product.price)} each · ${money(product.price * quantity)}</p>
+              </div>
+              <div class="quantity-control">
+                <button data-action="decrease" data-id="${id}">−</button>
+                <span>${quantity}</span>
+                <button data-action="increase" data-id="${id}">+</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      document.getElementById("itemTotal").textContent = cartItemCount();
+      document.getElementById("priceTotal").textContent = money(cartPriceTotal());
+      document.getElementById("checkoutButton").disabled = entries.length === 0;
+    }
+
+    function renderDetail() {
+      const product = getProduct(selectedProductId);
+      if (!product) return;
+
+      const quantity = getQuantity(product.id);
+      const wished = wishlist.includes(product.id);
+
+      const cartAction = quantity === 0
+        ? `<button class="primary-btn" data-action="add" data-id="${product.id}">Add to bag</button>`
+        : `<div class="quantity-control">
+             <button data-action="decrease" data-id="${product.id}">−</button>
+             <span>${quantity}</span>
+             <button data-action="increase" data-id="${product.id}">+</button>
+           </div>`;
+
+      document.getElementById("detailContent").innerHTML = `
+        <div class="detail-image">
+          <img src="${product.image}" alt="${product.name}">
+        </div>
+        <section class="detail-info">
+          <p style="text-transform:capitalize;color:#69716e;margin-top:0;">${product.category}</p>
+          <h1>${product.name}</h1>
+          <div class="detail-price">${money(product.price)}</div>
+          <p class="description">${product.description}</p>
+
+          <div class="detail-actions">
+            ${cartAction}
+            <button class="secondary-btn" data-action="wishlist" data-id="${product.id}">
+              ${wished ? "Remove from wishlist" : "Add to wishlist"}
+            </button>
+            <button class="secondary-btn" data-action="inquiry-product" data-id="${product.id}">
+              Inquiry about this product
+            </button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderWishlist() {
+      const items = wishlist.map(getProduct).filter(Boolean);
+
+      document.getElementById("wishlistGrid").innerHTML = items.length
+        ? items.map(productCard).join("")
+        : `<div class="empty">Your wishlist is empty.</div>`;
+    }
+
+    function renderDeliveryTotal() {
+      document.getElementById("deliveryFinalTotal").textContent =
+        money(cartPriceTotal() + selectedDeliveryCharge);
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll(".page").forEach((page) => {
+        page.classList.remove("active");
+      });
+
+      document.getElementById(pageId).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      if (pageId === "bagPage") renderBag();
+      if (pageId === "wishlistPage") renderWishlist();
+      if (pageId === "detailPage") renderDetail();
+      if (pageId === "deliveryPage") renderDeliveryTotal();
+    }
+
+    document.querySelectorAll(".filter").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeCategory = button.dataset.category;
+
+        const visibleProducts = activeCategory === "all"
+          ? products
+          : products.filter((product) => product.category === activeCategory);
+
+        funnel("category_filtered", {
+          category: activeCategory,
+          visibleProductCount: visibleProducts.length
+        });
+
+        document.querySelectorAll(".filter").forEach((filter) => {
+          filter.classList.toggle("active", filter === button);
+        });
+
+        renderProducts();
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+
+      const { action, id } = button.dataset;
+
+      if (action === "add" || action === "increase") changeQuantity(id, 1);
+      if (action === "decrease") changeQuantity(id, -1);
+      if (action === "wishlist") toggleWishlist(id);
+
+      if (action === "detail") {
+        const product = getProduct(id);
+        selectedProductId = id;
+
+        funnel("product_viewed", {
+          productId: product.id,
+          productName: product.name,
+          category: product.category,
+          price: product.price
+        });
+
+        showPage("detailPage");
+      }
+
+      if (action === "inquiry-product") {
+        const product = getProduct(id);
+
+        document.getElementById("inquiryMessage").value =
+          `I would like to know more about ${product.name}.`;
+
+        funnel("inquiry_opened", {
+          source: "product_detail",
+          productId: product.id,
+          productName: product.name
+        });
+
+        showPage("inquiryPage");
+      }
+    });
+
+    document.querySelectorAll("[data-go]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.go;
+        showPage(target === "shop" ? "shopPage" : "bagPage");
+      });
+    });
+
+    document.getElementById("bagButton").addEventListener("click", () => {
+      funnel("bag_viewed", {
+        itemsCount: cartItemCount(),
+        cartValue: cartPriceTotal()
+      });
+
+      showPage("bagPage");
+    });
+
+    document.getElementById("wishlistButton").addEventListener("click", () => {
+      funnel("wishlist_viewed", {
+        itemsCount: wishlist.length
+      });
+
+      showPage("wishlistPage");
+    });
+
+    document.getElementById("shopButton").addEventListener("click", () => {
+      funnel("collection_opened", {
+        source: "hero"
+      });
+
+      document.getElementById("collection").scrollIntoView({
+        behavior: "smooth"
+      });
+    });
+
+    document.getElementById("homeInquiryButton").addEventListener("click", () => {
+      document.getElementById("inquiryMessage").value = "";
+
+      funnel("inquiry_opened", {
+        source: "homepage"
+      });
+
+      showPage("inquiryPage");
+    });
+
+    document.querySelectorAll('input[name="payment"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const isCod = radio.value === "cod" && radio.checked;
+
+        document.getElementById("codMessage").classList.toggle("active", isCod);
+
+        funnel("payment_selected", {
+          method: radio.value,
+          cartValue: cartPriceTotal(),
+          itemsCount: cartItemCount()
+        });
+
+        if (isCod) {
+          funnel("payment_unavailable", {
+            method: "cod",
+            reason: "not_available_on_this_order",
+            cartValue: cartPriceTotal()
+          });
+        }
+      });
+    });
+
+    document.getElementById("checkoutButton").addEventListener("click", () => {
+      const payment = document.querySelector(
+        'input[name="payment"]:checked'
+      ).value;
+
+      if (payment === "cod") {
+        document.getElementById("codMessage").classList.add("active");
+
+        funnel("payment_unavailable", {
+          method: "cod",
+          reason: "not_available_on_this_order",
+          cartValue: cartPriceTotal()
+        });
+
+        return;
+      }
+
+      funnel("checkout_started", {
+        paymentMethod: "upi",
+        cartValue: cartPriceTotal(),
+        itemsCount: cartItemCount()
+      });
+
+      showPage("deliveryPage");
+    });
+
+    document.querySelectorAll(".delivery-option").forEach((option) => {
+      option.addEventListener("click", () => {
+        selectedDeliveryCharge = Number(option.dataset.deliveryCharge);
+        selectedDeliveryDays = Number(option.dataset.deliveryDays);
+
+        document.querySelectorAll(".delivery-option").forEach((item) => {
+          item.classList.toggle("selected", item === option);
+        });
+
+        funnel("delivery_selected", {
+          days: selectedDeliveryDays,
+          deliveryCharge: selectedDeliveryCharge,
+          cartValue: cartPriceTotal()
+        });
+
+        renderDeliveryTotal();
+      });
+    });
+
+    document.getElementById("confirmOrderButton").addEventListener("click", () => {
+      funnel("order_confirmed", {
+        paymentMethod: "upi",
+        deliveryDays: selectedDeliveryDays,
+        deliveryCharge: selectedDeliveryCharge,
+        orderValue: cartPriceTotal() + selectedDeliveryCharge,
+        itemsCount: cartItemCount()
+      });
+
+      document.getElementById("orderSuccess").style.display = "block";
+    });
+
+    document.getElementById("inquiryForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const message = document.getElementById("inquiryMessage").value;
+
+      funnel("inquiry_submitted", {
+        messageLength: message.length
+      });
+
+      document.getElementById("inquirySuccess").style.display = "block";
+      event.target.reset();
+    });
+
+    funnel("storefront_viewed", {
+      source: "direct",
+      referrer: document.referrer || "",
+      productCount: products.length
+    });
+
+    updateHeader();
+    renderProducts();
+    renderBag();
+    renderWishlist();
+  </script>
+</body>
+</html>
